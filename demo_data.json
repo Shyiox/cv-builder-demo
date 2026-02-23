@@ -1,0 +1,44 @@
+{
+  "photoDataUrl": "",
+  "photoFit": "contain",
+  "name": "Max Mustermann",
+  "chip1": "Backoffice · Automation",
+  "chip2": "Pragmatische Tools",
+  "motto": "Sauber. Nachvollziehbar. Testbar.",
+  "phone": "+49 170 0000000",
+  "email": "max@example.com",
+  "address": "Musterstraße 1\n12345 Musterstadt",
+  "birthDate": "01.01.1998",
+  "nationality": "deutsch",
+  "summary": "Ich baue pragmatische Tools für Automatisierung, Datenschutz (PII) und gute Nutzbarkeit. Ich arbeite strukturiert, dokumentiere klar und sichere Qualität über Tests und CI.",
+  "entries": [
+    {
+      "date": "2024 – heute",
+      "role": "Backoffice / Operations (Beispiel)",
+      "company": "Beispiel GmbH",
+      "desc": "• Prozesse dokumentiert und verbessert\n• Datenpflege & Reporting\n• Schnittstelle zwischen Team und Tools"
+    },
+    {
+      "date": "2022 – 2024",
+      "role": "Support / Administration (Beispiel)",
+      "company": "Demo AG",
+      "desc": "• Tickets strukturiert bearbeitet\n• Standardfälle automatisiert\n• Qualität durch Checklisten"
+    }
+  ],
+  "education": [
+    {
+      "date": "2014 – 2017",
+      "role": "Beispielschule",
+      "company": "Abschluss: Beispiel",
+      "desc": ""
+    }
+  ],
+  "skillsEdv": "Microsoft 365 (gut)",
+  "skillsLang": "Englisch (gut)",
+  "skillsDriver": "Klasse B",
+  "skillsTools": "Python · Git · GitHub Actions · pytest",
+  "skillsMethods": "Automation · Tests · Dokumentation",
+  "skillsPrivacy": "PII/Datenschutz · DSGVO (Grundlagen)",
+  "githubUrl": "https://github.com/your-profile",
+  "githubHighlights": "• ai-ticket-triage-demo: Web UI (Human-in-the-loop) mit Pages Demo\n• pii-redaction-tool: CLI (file/STDIN), Tests + CI\n• system-health-check-demo: Exit Codes + JSON Output, Tests + CI\n• workflow-toolbox: Tkinter GUI Launcher, whitelabel"
+}

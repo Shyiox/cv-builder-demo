@@ -1,0 +1,1839 @@
+﻿<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resume Builder (Demo)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --blue: #0b3b57;
+      --chip: #bfe9f7;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: rgba(11,59,87,0.20);
+      --bg: #f3f4f6;
+      --paper: #ffffff;
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .app{
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 16px;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .panel{
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 14px;
+      overflow: auto;
+      max-height: calc(100vh - 32px);
+    }
+
+    .panel h2{
+      margin: 6px 0 12px;
+      font-size: 16px;
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.35;
+    }
+
+    .field{
+      display: grid;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .field label{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .field input, .field textarea{
+      width: 100%;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+      background: #fff;
+    }
+    .field textarea{
+      min-height: 86px;
+      resize: vertical;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btnbar{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    button{
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      cursor: pointer;
+      background: #111827;
+      color: #fff;
+      transition: 0.15s ease;
+    }
+    button:hover{ transform: translateY(-1px); }
+    button.secondary{
+      background: #f3f4f6;
+      color: #111827;
+    }
+    button.danger{
+      background: #b91c1c;
+    }
+
+    /* ===== PREVIEW: 2 saubere A4-Seiten ===== */
+    .preview-wrap{
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 6px;
+      overflow: auto;
+      max-height: calc(100vh - 32px);
+    }
+
+    .pages{
+      display: grid;
+      gap: 16px;
+      padding-bottom: 10px;
+    }
+
+    .paper{
+      width: 210mm;
+      min-height: 297mm;
+      background: var(--paper);
+      box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* ===== Seite 1 Header (groß) ===== */
+    .cv-header{
+      display: grid;
+      grid-template-columns: 62mm 1fr;
+      background: var(--blue);
+      height: 62mm;
+    }
+
+    .photo{
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+    .photo img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .header-content{
+      padding: 18mm 14mm 10mm 14mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .name{
+      color: #fff;
+      font-size: 38px;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin: 0;
+    }
+
+    .chips{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      max-width: 120mm;
+    }
+    .chip{
+      background: var(--chip);
+      color: #0b2c3d;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    /* ===== Seite 2 Mini-Header (ohne Motto) ===== */
+    .mini-header{
+      background: var(--blue);
+      padding: 7mm 14mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .mini-name{
+      display: none;
+      margin: 0;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      line-height: 1.1;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .mini-sub{
+      margin: 0;
+      color: rgba(255,255,255,0.92);
+      font-size: 11.5px;
+      line-height: 1.5;
+      max-width: 120mm;
+      white-space: normal;
+      text-align: center;
+      font-style: italic;
+      letter-spacing: 0.3px;
+    }
+
+    .mini-chips{
+      display: none;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .mini-chip{
+      background: rgba(191,233,247,0.92);
+      color: #0b2c3d;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .cv-body{
+      padding: 12mm 14mm 14mm 14mm;
+    }
+
+    .contact{
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: #374151;
+      font-size: 12.5px;
+      margin-bottom: 8mm;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .contact span{
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      padding: 10px 14px;
+      border-radius: 14px;
+      line-height: 1.4;
+      display: inline-block;
+      white-space: normal;
+      text-align: center;
+      min-width: 140px;
+    }
+
+    .summary{
+      margin: 0 0 10mm;
+      font-size: 14.2px;
+      line-height: 1.5;
+      color: #111827;
+      max-width: 170mm;
+    }
+
+    .section-title{
+      margin: 0;
+      font-size: 24px;
+      color: #0b3b57;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .divider{
+      height: 2px;
+      background: #0b3b57;
+      margin: 8px 0 14px;
+      opacity: 0.35;
+    }
+
+    .timeline{
+      display: grid;
+      gap: 12px;
+      margin-bottom: 10mm;
+    }
+
+    .entry{
+      display: grid;
+      grid-template-columns: 34mm 1fr;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--line);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .date{
+      font-weight: 700;
+      color: #111827;
+      font-size: 14.5px;
+      padding-top: 2px;
+    }
+
+    .role{
+      font-weight: 700;
+      font-size: 16px;
+      margin: 0 0 6px;
+      color: #111827;
+    }
+
+    .company{
+      font-weight: 700;
+      font-size: 13px;
+      margin: 0 0 6px;
+      color: #111827;
+    }
+
+    .desc{
+      margin: 0;
+      color: #374151;
+      font-size: 13.5px;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .grid-2{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .skills-layout{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .info-card{
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #d7e2eb;
+      border-radius: 16px;
+      padding: 14px;
+      background: #ffffff;
+      box-shadow: 0 8px 20px rgba(11, 59, 87, 0.06);
+    }
+    .info-card::before{
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0b3b57 0%, #2a6a8f 100%);
+      opacity: 0.85;
+    }
+
+    .info-card h3{
+      margin: 2px 0 12px;
+      font-size: 18px;
+      color: #0b3b57;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+    }
+
+    .kv{
+      display: grid;
+      gap: 10px;
+      font-size: 13.5px;
+      color: #111827;
+    }
+    .kv .kv-row{
+      display: grid;
+      grid-template-columns: 118px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .kv .kv-label{
+      color: #44515f;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .kv .kv-value{
+      color: #111827;
+      font-weight: 500;
+      line-height: 1.38;
+    }
+
+    /* Fachlich: kompaktere Ausrichtung (wirkt sonst "leer" bei kurzen Werten) */
+    #skillsPreview .kv-row{
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      align-items: baseline;
+    }
+    #skillsPreview .kv-label{
+      white-space: nowrap;
+    }
+    #skillsPreview .kv-value{
+      word-break: break-word;
+    }
+
+    #githubPreview{
+      display: grid;
+      gap: 11px;
+    }
+    #githubPreview .gh-row{
+      display: grid;
+      gap: 7px;
+    }
+    #githubPreview .gh-label{
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #667085;
+      font-weight: 700;
+    }
+    #githubPreview .gh-link,
+    #githubPreview .gh-url-fallback{
+      display: block;
+      padding: 9px 12px;
+      border: 1px solid #d5e1ea;
+      border-radius: 12px;
+      background: #f4f8fb;
+      color: #0b3b57;
+      word-break: break-all;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    #githubPreview .gh-link{
+      text-decoration: none;
+      font-weight: 600;
+    }
+    #githubPreview .gh-link:hover{
+      background: #edf5fa;
+      border-color: #bfd3e1;
+    }
+    #githubPreview .gh-url-fallback{
+      color: #374151;
+      font-weight: 500;
+    }
+    #githubPreview .gh-list{
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+    #githubPreview .gh-list li{
+      margin: 0;
+      padding: 9px 11px;
+      border: 1px solid #d8e3ec;
+      border-left: 4px solid #0b3b57;
+      border-radius: 12px;
+      background: #f8fbfd;
+      line-height: 1.35;
+    }
+
+    #githubPreview .gh-item-title{
+      font-weight: 800;
+      color: var(--blue);
+      display: block;
+      margin-bottom: 2px;
+    }
+    #githubPreview .gh-item-desc{
+      color: #111827;
+      font-weight: 500;
+      display: block;
+    }
+
+
+
+
+
+    .smallnote{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .entry-controls{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .entry-controls button{
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    /* PRINT / PDF */
+    @media print {
+      body{ background: #fff; }
+      .app{ display: block; padding: 0; }
+      .panel{ display: none !important; }
+      .preview-wrap{ padding: 0; max-height: none; }
+      .pages{ gap: 0; }
+      .pages{ padding: 0 !important; margin: 0 !important; padding-bottom: 0 !important; }
+
+      /* Fix: Chrome Print + CSS Grid -> Seiten verschluckt */
+      .pages{ display: block !important; }
+      .paper{ display: block !important; }
+      body{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      /* Break control: only force a break after page 1 (avoid blank page 3) */
+      .paper{ page-break-after: auto !important; break-after: auto !important; }
+      #paper1{ page-break-after: always !important; break-after: page !important; }
+      #paper2{ page-break-after: auto !important; break-after: auto !important; }
+
+      /* Print: keep skills + GitHub side-by-side to save vertical space */
+      .skills-layout{ grid-template-columns: 1fr 1fr; gap: 10px; }
+      .info-card{ padding: 11px 12px; }
+      .info-card h3{ margin: 2px 0 8px; font-size: 17px; }
+      .kv{ gap: 8px; font-size: 13.1px; }
+
+      /* Print: tighten section rhythm a bit */
+      .section-title{ font-size: 22px; }
+      .divider{ margin: 6px 0 10px; }
+
+
+      /* Print: GitHub ultra-kompakt (5 Projekte passen sicher auf Seite 2) */
+      #githubPreview{ gap: 8px; }
+      #githubPreview .gh-row{ gap: 5px; }
+      #githubPreview .gh-label{ font-size: 10.5px; }
+      #githubPreview .gh-link,
+      #githubPreview .gh-url-fallback{
+        padding: 6px 9px;
+        font-size: 11.3px;
+        border-radius: 10px;
+      }
+      #githubPreview .gh-list{
+        display: block;
+        column-count: 2;
+        column-gap: 12px;
+      }
+      #githubPreview .gh-list li{
+        break-inside: avoid;
+        margin: 0 0 6px;
+        padding: 0 0 0 8px;
+        border: 0;
+        background: transparent;
+        border-left: 2px solid rgba(11,59,87,0.9);
+        border-radius: 0;
+        font-size: 11.3px;
+        line-height: 1.22;
+      }
+
+      /* Print: GitHub Highlights -> Titel und Beschreibung getrennt */
+      #githubPreview .gh-item-title{ display:block; margin-bottom: 1px; }
+      #githubPreview .gh-item-desc{ display:block; }
+
+
+      .paper{
+        width: 210mm;
+        height: 297mm;
+        min-height: 297mm;
+        box-shadow: none;
+        border-radius: 0;
+        page-break-after: auto;
+        break-after: auto;
+      }
+      .paper:last-child{ page-break-after: auto; }
+
+      /* etwas kompakter, damit es wirklich sauber bleibt */
+      .cv-body{ padding: 10.5mm 14mm 12mm 14mm; }
+      .summary{ font-size: 13.7px; margin: 0 0 8mm; }
+      .timeline{ gap: 10px; margin-bottom: 8mm; }
+      .entry{ gap: 10px; padding-bottom: 10px; }
+      .desc{ font-size: 13.1px; line-height: 1.42; }
+
+      @page{
+        size: A4;
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 980px){
+      .app{ grid-template-columns: 1fr; }
+      .panel, .preview-wrap{ max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- LEFT: EDITOR -->
+  <div class="panel" id="editor">
+    <h2>Lebenslauf bearbeiten</h2>
+    <div class="hint">
+      Links ändern, rechts sofort Vorschau. Foto hochladen, dann wird es direkt übernommen.
+      Export als PDF über „Als PDF speichern“.
+    </div>
+
+    <div class="field">
+      <label>Foto (Upload)</label>
+      <input type="file" id="photoUpload" accept="image/*" />
+      <div class="btnbar" style="margin-top: 8px;">
+        <button class="secondary" id="fitContain" style="flex: 1; text-align: center;">✅ Foto komplett (contain)</button>
+      </div>
+      <div class="btnbar" style="margin-top: 6px; margin-bottom: 8px;">
+        <button class="secondary" id="fitCover" style="flex: 1; text-align: center;">Foto vollflächig (cover)</button>
+      </div>
+      <div class="smallnote">Tipp: Nutze dein Bewerbungsfoto (hochformat oder quadratisch).</div>
+    </div>
+
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="name" />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Chip 1 (z.B. Jobtitel)</label>
+        <input type="text" id="chip1" />
+      </div>
+      <div class="field">
+        <label>Chip 2 (z.B. Schwerpunkt)</label>
+        <input type="text" id="chip2" />
+      </div>
+    </div>
+
+
+    <div class="field">
+      <label>LinkedIn Motto (nur auf Seite 2 / Fortsetzung)</label>
+      <input type="text" id="motto" />
+      <div class="smallnote">Wird oben auf Seite 2 unter deinem Namen angezeigt (Fortsetzung).</div>
+    </div>
+
+    <h2>Kontakt</h2>
+    <div class="row">
+      <div class="field">
+        <label>Telefon</label>
+        <input type="text" id="phone" />
+      </div>
+      <div class="field">
+        <label>E-Mail</label>
+        <input type="text" id="email" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Adresse (Straße, PLZ, Ort)</label>
+      <textarea id="address" style="min-height: 70px;"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Geburtsdatum</label>
+        <input type="text" id="birthDate" placeholder="TT.MM.YYYY" />
+      </div>
+      <div class="field">
+        <label>Nationalität</label>
+        <input type="text" id="nationality" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Kurzprofil / Summary</label>
+      <textarea id="summary"></textarea>
+    </div>
+
+    <hr style="border:0;border-top:1px solid #e5e7eb;margin:14px 0;">
+
+    <h2>Berufserfahrung</h2>
+    <div class="hint">Einträge hinzufügen, löschen oder verschieben.</div>
+    <div id="entriesEditor"></div>
+
+    <div class="btnbar">
+      <button class="secondary" id="addEntry">+ Eintrag hinzufügen</button>
+    </div>
+
+    <hr style="border:0;border-top:1px solid #e5e7eb;margin:14px 0;">
+
+    <h2>Ausbildung / Schulbildung</h2>
+    <div id="educationEditor"></div>
+    <div class="btnbar">
+      <button class="secondary" id="addEducation">+ Eintrag hinzufügen</button>
+    </div>
+
+    <hr style="border:0;border-top:1px solid #e5e7eb;margin:14px 0;">
+
+    <h2>Zusatzinfos</h2>
+
+    <div class="field">
+      <label>EDV-Kenntnisse</label>
+      <input type="text" id="skillsEdv" />
+    </div>
+
+    <div class="field">
+      <label>Sprachen</label>
+      <input type="text" id="skillsLang" />
+    </div>
+
+    <div class="field">
+      <label>Führerschein</label>
+      <input type="text" id="skillsDriver" />
+    </div>
+
+    <div class="field">
+      <label>Tools / Tech</label>
+      <input type="text" id="skillsTools" / placeholder="Python · Git · GitHub Actions · pytest">
+    </div>
+
+    <div class="field">
+      <label>Methoden / Arbeitsweise</label>
+      <input type="text" id="skillsMethods" / placeholder="Automation · Tests · Dokumentation">
+    </div>
+
+    <div class="field">
+      <label>Datenschutz / Privacy</label>
+      <input type="text" id="skillsPrivacy" / placeholder="PII/Datenschutz · DSGVO (Grundlagen)">
+    </div>
+
+    <h2>GitHub</h2>
+    <div class="hint">Optional, aber sehr sinnvoll: zeig kurz dein Profil und 2–3 Projekt-Highlights (ohne sensible Details).</div>
+
+    <div class="field">
+      <label>GitHub Profil (Link oder @Name)</label>
+      <input type="text" id="githubUrl" / placeholder="https://github.com/your-profile">
+    </div>
+
+    <div class="field">
+      <label>Projekt-Highlights (2–4 Zeilen)</label>
+      <textarea id="githubHighlights" style="min-height: 86px;"></textarea>
+    </div>
+
+    <div class="btnbar">
+      <button id="saveLocal">Speichern</button>
+      <button class="secondary" id="loadLocal">Letzte Version laden</button>
+      <button class="secondary" id="loadDemo" type="button">Demo-Daten laden</button>
+      <button class="danger" id="resetAll">Zurücksetzen</button>
+    </div>
+
+    <div class="btnbar" style="margin-top:10px;">
+      <button class="secondary" id="exportJson">Export (JSON)</button>
+      <button class="secondary" id="importJson" type="button">Import (JSON)</button>
+      <button class="secondary" id="selfTestBtn" type="button">Selftest</button>
+      <input type="file" id="importJsonFile" accept=".json,application/json,text/json" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;" />
+
+      <div class="hint" style="margin-top:10px; border:1px dashed #cbd5e1; background:#f8fafc;">
+        <b>Import-Hilfe:</b> Wenn der Datei-Dialog oder Buttons bei dir manchmal „nichts machen“, nutze eine dieser zwei sicheren Varianten:
+        <ul style="margin:8px 0 0 18px;">
+          <li><b>Drag & Drop:</b> JSON-Datei einfach auf die Box ziehen</li>
+          <li><b>Datei-Auswahl:</b> Datei wählen → „Import aus Datei“</li>
+        </ul>
+      </div>
+
+      <div id="jsonDropZone" style="margin-top:10px; border:2px dashed #cbd5e1; border-radius:14px; padding:14px; background:#ffffff;">
+        <b>JSON hier ablegen</b>
+        <div style="color:var(--muted); font-size:12px; margin-top:4px;">(Drag & Drop: z. B. lebenslauf_state.json)</div>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <input id="importJsonFileVisible" type="file" accept=".json,application/json,text/json"
+               style="flex:1; min-width:240px; border:1px solid #e5e7eb; border-radius:12px; padding:8px; background:#fff;" />
+        <button class="secondary" id="importJsonFromVisible" type="button">Import aus Datei</button>
+      </div>
+
+
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; user-select:none; color:var(--muted); font-size:12px;">Import über Copy & Paste (falls Dateiauswahl nicht reagiert)</summary>
+      <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+        <textarea id="pasteJsonText" placeholder="Hier JSON einfügen (aus Export-Datei) ..." style="width:100%; min-height:120px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:12px; border-radius:12px; border:1px solid #e5e7eb; padding:10px; background:#fff;"></textarea>
+        <div class="btnbar">
+          <button class="secondary" id="importJsonPasteBtn" type="button">Import aus Text</button>
+          <button class="secondary" id="clearPasteBtn" type="button">Text leeren</button>
+        </div>
+      </div>
+    </details>
+
+    </div>
+
+    <div class="hint" id="statusMsg" style="margin-top:10px; border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px; background:#f9fafb;">
+      Status: bereit. (JS OK)
+    </div>
+
+
+    <div class="btnbar" style="margin-top:12px;">
+      <button id="exportPdf">Als PDF speichern</button>
+    </div>
+
+    <div class="smallnote">
+      PDF-Tipp: Im Druckdialog „Ziel: Als PDF speichern“ wählen. Wenn es doch 3 Seiten werden sollte: Summary oder Aufgabenpunkte leicht kürzen.
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW (2 Seiten) -->
+  <div class="preview-wrap">
+    <div class="pages">
+
+      <!-- PAGE 1 -->
+      <div class="paper" id="paper1">
+        <div class="cv-header">
+          <div class="photo">
+            <img id="photoPreview" alt="Foto" src="" />
+          </div>
+          <div class="header-content">
+            <h1 class="name" id="namePreview">Resume Builder</h1>
+            <div class="chips">
+              <div class="chip" id="chip1Preview">Chip 1</div>
+              <div class="chip" id="chip2Preview">Chip 2</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cv-body">
+          <div class="contact" id="contactPreview"></div>
+
+          <p class="summary" id="summaryPreview"></p>
+
+          <h2 class="section-title">Berufserfahrung</h2>
+          <div class="divider"></div>
+          <div class="timeline" id="timelinePreviewPage1"></div>
+        </div>
+      </div>
+
+      <!-- PAGE 2 -->
+      <div class="paper" id="paper2">
+        <div class="mini-header">
+          <div style="display:grid; gap:6px; min-width:0;">
+            <h2 class="mini-name" id="miniName">Name</h2>
+            <p class="mini-sub" id="miniSub"></p>
+          </div>
+          <div class="mini-chips">
+            <span class="mini-chip" id="miniChip1">Chip 1</span>
+            <span class="mini-chip" id="miniChip2">Chip 2</span>
+          </div>
+        </div>
+
+        <div class="cv-body">
+          <div class="divider"></div>
+          <div class="timeline" id="timelinePreviewPage2"></div>
+
+          <h2 class="section-title">Ausbildung & Schulbildung</h2>
+          <div class="divider"></div>
+          <div class="timeline" id="educationPreview"></div>
+
+          <h2 class="section-title">Kenntnisse</h2>
+          <div class="divider"></div>
+
+          <div class="skills-layout">
+            <div class="info-card">
+              <h3>Fachlich</h3>
+              <div class="kv" id="skillsPreview"></div>
+            </div>
+
+            <div class="info-card">
+              <h3>GitHub</h3>
+              <div class="kv" id="githubPreview"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+  <script id="demoDataEmbedded" type="application/json">
+{
+  "photoDataUrl": "",
+  "photoFit": "contain",
+  "name": "Max Mustermann",
+  "chip1": "Backoffice · Automation",
+  "chip2": "Pragmatische Tools",
+  "motto": "Sauber. Nachvollziehbar. Testbar.",
+  "phone": "+49 170 0000000",
+  "email": "max@example.com",
+  "address": "Musterstraße 1\n12345 Musterstadt",
+  "birthDate": "01.01.1998",
+  "nationality": "deutsch",
+  "summary": "Ich baue pragmatische Tools für Automatisierung, Datenschutz (PII) und gute Nutzbarkeit. Ich arbeite strukturiert, dokumentiere klar und sichere Qualität über Tests und CI.",
+  "entries": [
+    {
+      "date": "2024 – heute",
+      "role": "Backoffice / Operations (Beispiel)",
+      "company": "Beispiel GmbH",
+      "desc": "• Prozesse dokumentiert und verbessert\n• Datenpflege & Reporting\n• Schnittstelle zwischen Team und Tools"
+    },
+    {
+      "date": "2022 – 2024",
+      "role": "Support / Administration (Beispiel)",
+      "company": "Demo AG",
+      "desc": "• Tickets strukturiert bearbeitet\n• Standardfälle automatisiert\n• Qualität durch Checklisten"
+    }
+  ],
+  "education": [
+    {
+      "date": "2014 – 2017",
+      "role": "Beispielschule",
+      "company": "Abschluss: Beispiel",
+      "desc": ""
+    }
+  ],
+  "skillsEdv": "Microsoft 365 (gut)",
+  "skillsLang": "Englisch (gut)",
+  "skillsDriver": "Klasse B",
+  "skillsTools": "Python · Git · GitHub Actions · pytest",
+  "skillsMethods": "Automation · Tests · Dokumentation",
+  "skillsPrivacy": "PII/Datenschutz · DSGVO (Grundlagen)",
+  "githubUrl": "https://github.com/your-profile",
+  "githubHighlights": "• ai-ticket-triage-demo: Web UI (Human-in-the-loop) mit Pages Demo\n• pii-redaction-tool: CLI (file/STDIN), Tests + CI\n• system-health-check-demo: Exit Codes + JSON Output, Tests + CI\n• workflow-toolbox: Tkinter GUI Launcher, whitelabel"
+}
+  </script>
+
+<script>
+  // ---------- SETTINGS ----------
+  const STORAGE_KEY = "cv_builder_state_nils";
+  const STORAGE_KEYS_FALLBACK = [
+    STORAGE_KEY,
+    "cv_builder_state",
+    "cv_builder_state_v8",
+    "cvBuilderState",
+    "cv_builder_state_nils_v8"
+  ];
+
+  function setStatus(msg, type="info"){
+    const el = document.getElementById("statusMsg");
+    if (!el) return;
+    const prefix = type === "ok" ? "✅" : type === "warn" ? "⚠️" : type === "error" ? "❌" : "ℹ️";
+    el.textContent = `Status: ${prefix} ${msg}`;
+    el.style.background =
+      type === "ok" ? "#ecfdf5" :
+      type === "warn" ? "#fffbeb" :
+      type === "error" ? "#fef2f2" : "#f9fafb";
+    el.style.borderColor =
+      type === "ok" ? "#a7f3d0" :
+      type === "warn" ? "#fcd34d" :
+      type === "error" ? "#fecaca" : "#e5e7eb";
+    try{ el.scrollIntoView({behavior:"smooth", block:"nearest"}); }catch(e){}
+  }
+
+  // --- Debug: show JS errors directly in the UI (helps when it "does nothing") ---
+  window.addEventListener("error", (ev) => {
+    try{
+      const msg = ev?.message || "Unbekannter Fehler";
+      const src = ev?.filename ? String(ev.filename).split("/").slice(-1)[0] : "";
+      const line = ev?.lineno ? `:${ev.lineno}` : "";
+      setStatus(`JS Fehler: ${msg} ${src}${line}`.trim(), "error");
+    }catch(_){}
+  });
+  window.addEventListener("unhandledrejection", (ev) => {
+    try{
+      const msg = ev?.reason?.message || String(ev?.reason || "Unhandled rejection");
+      setStatus(`Promise Fehler: ${msg}`, "error");
+    }catch(_){}
+  });
+
+
+  function safeParseJSON(raw){
+    try{ return JSON.parse(raw); }catch(e){ return null; }
+  }
+
+  function normalizeLoaded(loaded){
+    const base = clone(defaultState);
+    const merged = { ...base, ...(loaded || {}) };
+
+    // Backward compatibility: ältere Saves (Ehrenamt) -> GitHub-Felder
+    if (!merged.githubUrl && loaded?.volOrg) merged.githubUrl = loaded.volOrg;
+    if (!merged.githubHighlights && loaded?.volAreas) merged.githubHighlights = loaded.volAreas;
+
+    if (Array.isArray(loaded?.entries)) merged.entries = loaded.entries;
+    if (Array.isArray(loaded?.education)) merged.education = loaded.education;
+
+    return merged;
+  }
+
+  function loadFromAnyKey(){
+    for (const k of STORAGE_KEYS_FALLBACK){
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const parsed = safeParseJSON(raw);
+      if (parsed) return { key: k, data: parsed };
+    }
+    return null;
+  }
+
+  function parseImportedJsonText(raw){
+    const text = String(raw ?? "").replace(/^\uFEFF/, "").trim();
+    if (!text) throw new Error("Leere JSON-Datei");
+    return JSON.parse(text);
+  }
+
+  function readFileAsText(file, cb){
+    const reader = new FileReader();
+    reader.onload = () => cb(null, String(reader.result || ""));
+    reader.onerror = () => cb(new Error("Datei konnte nicht gelesen werden."));
+    reader.readAsText(file);
+  }
+
+  function applyImportedState(loaded, sourceLabel){
+    try{
+      state = normalizeLoaded(loaded);
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(_){ }
+      render();
+      setStatus(`Import erfolgreich (${sourceLabel}).`, "ok");
+    }catch(e){
+      setStatus("Import fehlgeschlagen: " + (e?.message || String(e)), "error");
+    }
+  }
+
+  // ---------- STATE ----------
+  const defaultState = {
+    photoDataUrl: "",
+    photoFit: "contain", // "contain" oder "cover"
+
+    // Header
+    name: "",
+    chip1: "",
+    chip2: "",
+
+    // Motto / Kurzzeile (nur Seite 2)
+    motto: "",
+
+    // Contact
+    phone: "",
+    email: "",
+    address: "",
+    birthDate: "",
+    nationality: "",
+
+    // Summary
+    summary: "",
+
+    // Experience entries
+    entries: [
+      { date: "", role: "", company: "", desc: "" }
+    ],
+
+    // Education
+    education: [
+      { date: "", role: "", company: "", desc: "" }
+    ],
+
+    // Skills
+    skillsEdv: "",
+    skillsLang: "",
+    skillsDriver: "",
+    skillsTools: "",
+    skillsMethods: "",
+    skillsPrivacy: "",
+
+    // GitHub
+    githubUrl: "",
+    githubHighlights: ""
+  };
+
+  function clone(obj){
+    try{
+      if (typeof structuredClone === "function") return structuredClone(obj);
+    }catch(e){}
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  let state = clone(defaultState);
+  let autoloadKey = null;
+
+
+  // ---------- HELPERS ----------
+  const $ = (id) => document.getElementById(id);
+
+  function escapeHtml(str){
+    return (str ?? "").replace(/[&<>"']/g, (m) => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[m]));
+  }
+
+  function placeholderPhoto(){
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="400" height="600">
+        <rect width="100%" height="100%" fill="#e5e7eb"/>
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+          font-family="Arial" font-size="24" fill="#6b7280">Foto</text>
+      </svg>
+    `);
+  }
+
+  function createEntryNode(e){
+    const div = document.createElement("div");
+    div.className = "entry";
+    div.innerHTML = `
+      <div class="date">${escapeHtml(e.date)}</div>
+      <div>
+        <p class="role">${escapeHtml(e.role)}</p>
+        <p class="company">${escapeHtml(e.company)}</p>
+        <p class="desc">${escapeHtml(e.desc)}</p>
+      </div>
+    `;
+    return div;
+  }
+
+  function renderTimeline(targetEl, items){
+    if (!targetEl) return;
+    targetEl.innerHTML = "";
+    items.forEach((e) => targetEl.appendChild(createEntryNode(e)));
+  }
+
+  function renderExperienceTwoPages(){
+    const p1 = $("timelinePreviewPage1");
+    const p2 = $("timelinePreviewPage2");
+    if (!p1 || !p2) return;
+
+    p1.innerHTML = "";
+    p2.innerHTML = "";
+
+    const breakIndex = 5; // 0-4 Seite 1 | ab 5 Seite 2
+    state.entries.forEach((e, idx) => {
+      if (idx < breakIndex) p1.appendChild(createEntryNode(e));
+      else p2.appendChild(createEntryNode(e));
+    });
+  }
+
+  // ---------- RENDER ----------
+  function render(){
+    // Preview Header
+    if ($("namePreview")) $("namePreview").textContent = state.name || "Name";
+    if ($("chip1Preview")) $("chip1Preview").textContent = state.chip1 || "";
+    if ($("chip2Preview")) $("chip2Preview").textContent = state.chip2 || "";
+
+    // Page 2 mini header
+    if ($("miniName")) $("miniName").textContent = state.name || "Name";
+    if ($("miniChip1")) $("miniChip1").textContent = state.chip1 || "";
+    if ($("miniChip2")) $("miniChip2").textContent = state.chip2 || "";
+    if ($("miniSub")) $("miniSub").innerHTML = (state.motto || "").replace(/\s*\|\s*/g, "<br>");
+
+    // Summary
+    if ($("summaryPreview")) $("summaryPreview").textContent = state.summary || "";
+
+    // Contact pills
+    const contact = $("contactPreview");
+    if (contact){
+      contact.innerHTML = "";
+
+      if (state.address?.trim()) {
+        const s = document.createElement("span");
+        const lines = state.address.trim().split('\n').map(escapeHtml);
+        s.innerHTML = "📍 " + lines.join('<br>');
+        contact.appendChild(s);
+      }
+
+      if (state.birthDate?.trim() || state.nationality?.trim()) {
+        const s = document.createElement("span");
+        const parts = [];
+        if (state.birthDate?.trim()) parts.push(`🎂 ${state.birthDate.trim()}`);
+        if (state.nationality?.trim()) parts.push(`🏳️ ${state.nationality.trim()}`);
+        s.innerHTML = parts.join('<br>');
+        contact.appendChild(s);
+      }
+
+      if (state.phone?.trim() || state.email?.trim()) {
+        const s = document.createElement("span");
+        const parts = [];
+        if (state.phone?.trim()) parts.push(`☎ ${state.phone.trim()}`);
+        if (state.email?.trim()) parts.push(`✉ ${state.email.trim()}`);
+        s.innerHTML = parts.join('<br>');
+        contact.appendChild(s);
+      }
+    }
+
+    // Photo
+    const img = $("photoPreview");
+    if (img) {
+      img.src = state.photoDataUrl ? state.photoDataUrl : placeholderPhoto();
+      img.style.objectFit = state.photoFit === "contain" ? "contain" : "cover";
+    }
+
+    // Experience split
+    renderExperienceTwoPages();
+
+    // Education
+    renderTimeline($("educationPreview"), state.education);
+
+    // Skills
+    const skills = $("skillsPreview");
+    if (skills){
+      const skillRows = [
+        { label: "EDV", value: state.skillsEdv },
+        { label: "Sprachen", value: state.skillsLang },
+        { label: "Führerschein", value: state.skillsDriver },
+        { label: "Tools", value: state.skillsTools },
+        { label: "Methoden", value: state.skillsMethods },
+        { label: "Privacy", value: state.skillsPrivacy }
+      ];
+      skills.innerHTML = `
+        ${skillRows.map((row) => `
+          <div class="kv-row">
+            <span class="kv-label">${escapeHtml(row.label)}</span>
+            <span class="kv-value">${escapeHtml((row.value || "").trim() || "-")}</span>
+          </div>
+        `).join("")}
+      `;
+    }
+
+    // GitHub
+    const gh = $("githubPreview");
+    if (gh){
+      const url = (state.githubUrl || "").trim();
+      const hl = (state.githubHighlights || "").trim();
+      const normalizedUrl = url.replace(/^@/, "github.com/");
+      let href = "";
+      if (/^https?:\/\//i.test(normalizedUrl)) href = normalizedUrl;
+      else if (/^github\.com\//i.test(normalizedUrl)) href = "https://" + normalizedUrl;
+      if (/^http:\/\//i.test(href)) href = "https://" + href.slice(7);
+      if (!/^https:\/\/github\.com\//i.test(href)) href = "";
+
+      const profileHtml = href
+        ? `<a class="gh-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`
+        : `<span class="gh-url-fallback">${escapeHtml(url || "-")}</span>`;
+
+      const highlightItems = hl
+        .replace(/\r\n?/g, "\n")
+        .split("\n")
+        .map((line) => line.trim())
+        .map((line) => line.replace(/^[•*-]\s*/, ""))
+        .filter(Boolean);
+
+            function formatGitHubHighlight(line){
+        const m = String(line).match(/^(.{2,50}?)\s*:\s*(.+)$/); // "Projekt: Beschreibung"
+        if (!m) return escapeHtml(line);
+        const title = escapeHtml(m[1].trim());
+        const desc  = escapeHtml(m[2].trim());
+        return `<div class="gh-item-title">${title}:</div><div class="gh-item-desc">${desc}</div>`;
+      }
+
+      const highlightsHtml = highlightItems.length
+        ? `<ul class="gh-list">${highlightItems.map((line) => `<li>${formatGitHubHighlight(line)}</li>`).join("")}</ul>`
+        : `<span class="gh-url-fallback">-</span>`;
+
+      gh.innerHTML = `
+        <div class="gh-row">
+          <div class="gh-label">Profil</div>
+          ${profileHtml}
+        </div>
+        <div class="gh-row">
+          <div class="gh-label">Projekte</div>
+          ${highlightsHtml}
+        </div>
+      `;
+    }
+
+    // Editor values
+    if ($("name")) $("name").value = state.name ?? "";
+    if ($("chip1")) $("chip1").value = state.chip1 ?? "";
+    if ($("chip2")) $("chip2").value = state.chip2 ?? "";
+    if ($("motto")) $("motto").value = state.motto ?? "";
+
+    if ($("phone")) $("phone").value = state.phone ?? "";
+    if ($("email")) $("email").value = state.email ?? "";
+    if ($("address")) $("address").value = state.address ?? "";
+    if ($("birthDate")) $("birthDate").value = state.birthDate ?? "";
+    if ($("nationality")) $("nationality").value = state.nationality ?? "";
+
+    if ($("summary")) $("summary").value = state.summary ?? "";
+
+    if ($("skillsEdv")) $("skillsEdv").value = state.skillsEdv ?? "";
+    if ($("skillsLang")) $("skillsLang").value = state.skillsLang ?? "";
+    if ($("skillsDriver")) $("skillsDriver").value = state.skillsDriver ?? "";
+    if ($("skillsTools")) $("skillsTools").value = state.skillsTools ?? "";
+    if ($("skillsMethods")) $("skillsMethods").value = state.skillsMethods ?? "";
+    if ($("skillsPrivacy")) $("skillsPrivacy").value = state.skillsPrivacy ?? "";
+
+    if ($("githubUrl")) $("githubUrl").value = state.githubUrl ?? "";
+    if ($("githubHighlights")) $("githubHighlights").value = state.githubHighlights ?? "";
+
+    renderEntriesEditor();
+    renderEducationEditor();
+  }
+
+  function renderEntriesEditor(){
+    const wrap = $("entriesEditor");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+
+    state.entries.forEach((entry, idx) => {
+      const box = document.createElement("div");
+      box.style.border = "1px solid #e5e7eb";
+      box.style.borderRadius = "14px";
+      box.style.padding = "12px";
+      box.style.marginBottom = "12px";
+      box.style.background = "#fff";
+
+      box.innerHTML = `
+        <div class="row">
+          <div class="field">
+            <label>Zeitraum</label>
+            <input type="text" data-list="entries" data-k="date" data-i="${idx}" value="${escapeHtml(entry.date)}" />
+          </div>
+          <div class="field">
+            <label>Position</label>
+            <input type="text" data-list="entries" data-k="role" data-i="${idx}" value="${escapeHtml(entry.role)}" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Unternehmen / Ort</label>
+          <input type="text" data-list="entries" data-k="company" data-i="${idx}" value="${escapeHtml(entry.company)}" />
+        </div>
+
+        <div class="field">
+          <label>Beschreibung</label>
+          <textarea data-list="entries" data-k="desc" data-i="${idx}">${escapeHtml(entry.desc)}</textarea>
+        </div>
+
+        <div class="entry-controls">
+          <button class="secondary" data-action="up" data-list="entries" data-i="${idx}">↑ Hoch</button>
+          <button class="secondary" data-action="down" data-list="entries" data-i="${idx}">↓ Runter</button>
+          <button class="danger" data-action="delete" data-list="entries" data-i="${idx}">Löschen</button>
+        </div>
+      `;
+
+      wrap.appendChild(box);
+    });
+
+    wireListEditor(wrap);
+  }
+
+  function renderEducationEditor(){
+    const wrap = $("educationEditor");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+
+    state.education.forEach((entry, idx) => {
+      const box = document.createElement("div");
+      box.style.border = "1px solid #e5e7eb";
+      box.style.borderRadius = "14px";
+      box.style.padding = "12px";
+      box.style.marginBottom = "12px";
+      box.style.background = "#fff";
+
+      box.innerHTML = `
+        <div class="row">
+          <div class="field">
+            <label>Zeitraum</label>
+            <input type="text" data-list="education" data-k="date" data-i="${idx}" value="${escapeHtml(entry.date)}" />
+          </div>
+          <div class="field">
+            <label>Schule / Abschluss</label>
+            <input type="text" data-list="education" data-k="role" data-i="${idx}" value="${escapeHtml(entry.role)}" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Details</label>
+          <input type="text" data-list="education" data-k="company" data-i="${idx}" value="${escapeHtml(entry.company)}" />
+        </div>
+
+        <div class="field">
+          <label>Beschreibung (optional)</label>
+          <textarea data-list="education" data-k="desc" data-i="${idx}">${escapeHtml(entry.desc)}</textarea>
+        </div>
+
+        <div class="entry-controls">
+          <button class="secondary" data-action="up" data-list="education" data-i="${idx}">↑ Hoch</button>
+          <button class="secondary" data-action="down" data-list="education" data-i="${idx}">↓ Runter</button>
+          <button class="danger" data-action="delete" data-list="education" data-i="${idx}">Löschen</button>
+        </div>
+      `;
+
+      wrap.appendChild(box);
+    });
+
+    wireListEditor(wrap);
+  }
+
+  function wireListEditor(container){
+    container.querySelectorAll("input[data-k], textarea[data-k]").forEach(el => {
+      el.addEventListener("input", () => {
+        const i = Number(el.dataset.i);
+        const k = el.dataset.k;
+        const list = el.dataset.list;
+        state[list][i][k] = el.value;
+        render();
+      });
+    });
+
+    container.querySelectorAll("button[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.dataset.i);
+        const action = btn.dataset.action;
+        const list = btn.dataset.list;
+
+        if (action === "delete"){
+          state[list].splice(i, 1);
+          render();
+        }
+        if (action === "up" && i > 0){
+          const tmp = state[list][i-1];
+          state[list][i-1] = state[list][i];
+          state[list][i] = tmp;
+          render();
+        }
+        if (action === "down" && i < state[list].length - 1){
+          const tmp = state[list][i+1];
+          state[list][i+1] = state[list][i];
+          state[list][i] = tmp;
+          render();
+        }
+      });
+    });
+  }
+
+  function bindEvents(){
+    $("name")?.addEventListener("input", (e) => { state.name = e.target.value; render(); });
+    $("chip1")?.addEventListener("input", (e) => { state.chip1 = e.target.value; render(); });
+    $("chip2")?.addEventListener("input", (e) => { state.chip2 = e.target.value; render(); });
+    $("motto")?.addEventListener("input", (e) => { state.motto = e.target.value; render(); });
+
+    $("phone")?.addEventListener("input", (e) => { state.phone = e.target.value; render(); });
+    $("email")?.addEventListener("input", (e) => { state.email = e.target.value; render(); });
+    $("address")?.addEventListener("input", (e) => { state.address = e.target.value; render(); });
+    $("birthDate")?.addEventListener("input", (e) => { state.birthDate = e.target.value; render(); });
+    $("nationality")?.addEventListener("input", (e) => { state.nationality = e.target.value; render(); });
+
+    $("summary")?.addEventListener("input", (e) => { state.summary = e.target.value; render(); });
+
+    $("skillsEdv")?.addEventListener("input", (e) => { state.skillsEdv = e.target.value; render(); });
+    $("skillsLang")?.addEventListener("input", (e) => { state.skillsLang = e.target.value; render(); });
+    $("skillsDriver")?.addEventListener("input", (e) => { state.skillsDriver = e.target.value; render(); });
+
+    $("skillsTools")?.addEventListener("input", (e) => { state.skillsTools = e.target.value; render(); });
+    $("skillsMethods")?.addEventListener("input", (e) => { state.skillsMethods = e.target.value; render(); });
+    $("skillsPrivacy")?.addEventListener("input", (e) => { state.skillsPrivacy = e.target.value; render(); });
+
+    $("githubUrl")?.addEventListener("input", (e) => { state.githubUrl = e.target.value; render(); });
+    $("githubHighlights")?.addEventListener("input", (e) => { state.githubHighlights = e.target.value; render(); });
+
+    $("photoUpload")?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.photoDataUrl = reader.result;
+        render();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $("fitContain")?.addEventListener("click", () => {
+      state.photoFit = "contain";
+      render();
+      updatePhotoFitButtons();
+    });
+
+    $("fitCover")?.addEventListener("click", () => {
+      state.photoFit = "cover";
+      render();
+      updatePhotoFitButtons();
+    });
+
+    $("addEntry")?.addEventListener("click", () => {
+      state.entries.unshift({
+        date: "MM/YYYY – MM/YYYY",
+        role: "Neue Position",
+        company: "Unternehmen, Ort",
+        desc: "• Aufgabe 1\n• Aufgabe 2\n• Aufgabe 3"
+      });
+      render();
+    });
+
+    $("addEducation")?.addEventListener("click", () => {
+      state.education.unshift({
+        date: "YYYY – YYYY",
+        role: "Schule / Abschluss",
+        company: "Details",
+        desc: ""
+      });
+      render();
+    });
+
+    
+    // ---- Import helper (single source of truth) ----
+    function applyImportedState(loaded, sourceLabel){
+      try{
+        const normalized = normalizeLoaded(loaded);
+        state = normalized;
+        try{
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }catch(e){
+          setStatus("Import ok, aber Speichern in localStorage blockiert. (Trotzdem im aktuellen Tab geladen.)", "warn");
+        }
+        render();
+        setStatus(`Import erfolgreich (${sourceLabel}).`, "ok");
+        console.log("[CV Builder] Import ok:", sourceLabel, state);
+      }catch(e){
+        console.error("[CV Builder] Import failed:", e);
+        setStatus("Import fehlgeschlagen: " + (e?.message || String(e)), "error");
+      }
+    }
+
+    function readFileAsText(file, cb){
+      const reader = new FileReader();
+      reader.onload = () => cb(null, String(reader.result || ""));
+      reader.onerror = () => cb(new Error("Datei konnte nicht gelesen werden."));
+      reader.readAsText(file);
+    }
+
+$("exportPdf")?.addEventListener("click", () => window.print());
+
+    // JSON Export/Import (robust, unabhängig vom Browser-Storage)
+    $("exportJson")?.addEventListener("click", () => {
+      try{
+        const payload = JSON.stringify(state, null, 2);
+        const blob = new Blob([payload], { type: "application/json" });
+        const a = document.createElement("a");
+        const ts = new Date().toISOString().slice(0,10);
+        a.download = `lebenslauf_${(state.name || "export").replace(/\s+/g,"_")}_${ts}.json`;
+        a.href = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(a.href);
+          a.remove();
+        }, 0);
+        setStatus("Export gestartet. JSON-Datei wurde heruntergeladen.", "ok");
+      }catch(e){
+        setStatus("Export fehlgeschlagen.", "error");
+      }
+    });
+
+    $("selfTestBtn")?.addEventListener("click", () => {
+      setStatus("Selftest: Klick erkannt ✅ (" + new Date().toLocaleTimeString() + ")", "ok");
+    });
+
+    $("importJson")?.addEventListener("click", () => {
+      const inp = $("importJsonFile");
+      if (!inp) return;
+      inp.value = "";
+      if (typeof inp.showPicker === "function") inp.showPicker();
+      else inp.click();
+    });
+
+    $("importJsonFile")?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const loaded = parseImportedJsonText(reader.result);
+          state = normalizeLoaded(loaded);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          render();
+          setStatus(`Import erfolgreich (Datei: ${file.name}). Daten wurden übernommen und lokal gespeichert.`, "ok");
+        }catch(err){
+          setStatus("Import fehlgeschlagen: Datei ist kein gültiges JSON.", "error");
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+
+
+    $("importJsonPasteBtn")?.addEventListener("click", () => {
+      const txt = $("pasteJsonText")?.value || "";
+      if (!txt.trim()){
+        setStatus("Kein JSON im Textfeld. Nutze Export (JSON) in der alten Version und füge es hier ein.", "warn");
+        return;
+      }
+      try{
+        const loaded = parseImportedJsonText(txt);
+        state = normalizeLoaded(loaded);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        render();
+        setStatus("Import aus Text erfolgreich. Daten wurden übernommen.", "ok");
+      }catch(e){
+        setStatus("Import aus Text fehlgeschlagen: JSON ist ungültig.", "error");
+      }
+    });
+
+    $("clearPasteBtn")?.addEventListener("click", () => {
+      const t = $("pasteJsonText");
+      if (t) t.value = "";
+      setStatus("Textfeld geleert.", "info");
+    });
+
+
+
+    $("saveLocal")?.addEventListener("click", () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setStatus("Gespeichert (lokal im Browser).", "ok");
+    });
+
+    $("loadLocal")?.addEventListener("click", () => {
+  const hit = loadFromAnyKey();
+  if (!hit){
+    setStatus("Keine gespeicherte Version gefunden. Nutze ggf. Import (JSON).", "warn");
+    return;
+  }
+  try{
+    state = normalizeLoaded(hit.data);
+    render();
+    setStatus(`Geladen (Quelle: ${hit.key}).`, "ok");
+  }catch(e){
+    setStatus("Fehler beim Laden der gespeicherten Daten.", "error");
+  }
+});
+
+
+    
+    // Demo-Daten (für Public Repo / Beispiel)
+    $("loadDemo")?.addEventListener("click", async () => {
+      let data = null;
+
+      // 1) Primär: demo_data.json laden (funktioniert über http(s), z. B. GitHub Pages / lokaler Server)
+      try{
+        const res = await fetch("demo_data.json", { cache: "no-store" });
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        data = await res.json();
+      }catch(e){
+        // 2) Fallback: Embedded Demo JSON (funktioniert auch bei file://)
+        try{
+          const el = document.getElementById("demoDataEmbedded");
+          if (el && el.textContent.trim()) data = JSON.parse(el.textContent);
+        }catch(_){ /* ignore */ }
+      }
+
+      if(!data){
+        const hint = (location.protocol === "file:")
+          ? "Hinweis: Du hast die Datei direkt per Doppelklick geöffnet (file://). In Chrome blockiert das oft fetch(). Öffne den Ordner z. B. mit:  py -m http.server 8000  und dann http://localhost:8000/  – oder nutze Import (JSON)."
+          : "Bitte prüfe, ob demo_data.json im gleichen Ordner liegt oder nutze Import (JSON).";
+        setStatus("Demo-Daten konnten nicht geladen werden. " + hint, "warn");
+        return;
+      }
+
+      // Nutze bestehenden Import-Pfad (normalisiert + rendert + speichert)
+      if (typeof applyImportedState === "function") applyImportedState(data, "Demo-Daten");
+      else {
+        state = normalizeLoaded(data);
+        render();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+      setStatus("Demo-Daten geladen (nur Testdaten).", "ok");
+    });
+
+$("resetAll")?.addEventListener("click", () => {
+      setStatus("Zurücksetzen angefragt…", "warn");
+      if (!confirm("Wirklich alles zurücksetzen? (lokale Browserdaten)")) return;
+
+      state = clone(defaultState);
+
+      // Alte/alternative Keys ebenfalls entfernen, damit nichts "wieder auftaucht"
+      try{
+        localStorage.removeItem(STORAGE_KEY);
+        if (Array.isArray(STORAGE_KEYS_FALLBACK)){
+          for (const k of STORAGE_KEYS_FALLBACK) localStorage.removeItem(k);
+        }
+      }catch(_){ /* ignore */ }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      setStatus("Zurückgesetzt (lokal im Browser).", "ok");
+    });
+
+}
+
+  function tryAutoLoad(){
+  try{
+    autoloadKey = null;
+    const hit = loadFromAnyKey();
+    if (!hit) return;
+    autoloadKey = hit.key;
+    state = normalizeLoaded(hit.data);
+  }catch(e){
+    autoloadKey = null;
+    state = clone(defaultState);
+  }
+}
+
+
+  function updatePhotoFitButtons(){
+    const btnContain = $("fitContain");
+    const btnCover = $("fitCover");
+    if (btnContain) {
+      if (state.photoFit === "contain") {
+        btnContain.textContent = "✅ Foto komplett (contain)";
+        btnContain.style.background = "#0b3b57";
+        btnContain.style.color = "#fff";
+      } else {
+        btnContain.textContent = "Foto komplett (contain)";
+        btnContain.style.background = "#f3f4f6";
+        btnContain.style.color = "#111827";
+      }
+    }
+    if (btnCover) {
+      if (state.photoFit === "cover") {
+        btnCover.textContent = "✅ Foto vollflächig (cover)";
+        btnCover.style.background = "#0b3b57";
+        btnCover.style.color = "#fff";
+      } else {
+        btnCover.textContent = "Foto vollflächig (cover)";
+        btnCover.style.background = "#f3f4f6";
+        btnCover.style.color = "#111827";
+      }
+    }
+  }
+
+
+  function setupEmergencyImportBindings(){
+    const importHidden = $("importJsonFile");
+    const importVisible = $("importJsonFileVisible");
+
+    const importFromFile = (file, sourceLabel) => {
+      if (!file) return;
+      readFileAsText(file, (err, text) => {
+        if (err) return setStatus(err.message, "error");
+        try{
+          const loaded = parseImportedJsonText(text);
+          applyImportedState(loaded, sourceLabel);
+        }catch(e){
+          setStatus("Import fehlgeschlagen: " + (e?.message || String(e)), "error");
+        }
+      });
+    };
+
+    $("importJson")?.addEventListener("click", () => {
+      if (!importHidden) return;
+      importHidden.value = "";
+      if (typeof importHidden.showPicker === "function") importHidden.showPicker();
+      else importHidden.click();
+    });
+
+    importHidden?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      importFromFile(file, file ? `Datei: ${file.name}` : "Datei");
+      e.target.value = "";
+    });
+
+    $("importJsonFromVisible")?.addEventListener("click", () => {
+      const file = importVisible?.files?.[0];
+      if (!file){
+        setStatus("Bitte zuerst eine JSON-Datei auswählen.", "warn");
+        return;
+      }
+      importFromFile(file, `Datei: ${file.name}`);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // ✅ Dadurch ist es IMMER ausgefüllt:
+    // - Wenn du früher gespeichert hast: es lädt automatisch
+    // - Sonst nutzt es die Default-Daten
+    tryAutoLoad();
+    bindEvents();
+    setupEmergencyImportBindings();
+    updatePhotoFitButtons();
+    render();
+    if (autoloadKey){
+      setStatus(`Lokale Daten geladen (Quelle: ${autoloadKey}). Das ist nur in deinem Browser gespeichert. Für Demo: „Demo-Daten laden“ oder „Zurücksetzen“.`, "info");
+    }else{
+      setStatus("bereit.", "info");
+    }
+  });
+
+
+    // Visible file import (falls hidden click nicht greift)
+    $("importJsonFromVisible")?.addEventListener("click", () => {
+      const f = $("importJsonFileVisible")?.files?.[0];
+      if (!f){
+        setStatus("Bitte zuerst eine JSON-Datei auswählen.", "warn");
+        return;
+      }
+      readFileAsText(f, (err, text) => {
+        if (err) return setStatus(err.message, "error");
+        try{
+          const loaded = parseImportedJsonText(text);
+          applyImportedState(loaded, `Datei: ${f.name}`);
+        }catch(e){
+          setStatus("Ungültiges JSON in Datei: " + (e?.message || String(e)), "error");
+        }
+      });
+    });
+
+    // Drag & drop import
+    const dz = $("jsonDropZone");
+    if (dz){
+      const setDz = (active) => {
+        dz.style.borderColor = active ? "#0ea5e9" : "#cbd5e1";
+        dz.style.background = active ? "#f0f9ff" : "#ffffff";
+      };
+      dz.addEventListener("dragover", (e) => { e.preventDefault(); setDz(true); });
+      dz.addEventListener("dragleave", () => setDz(false));
+      dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        setDz(false);
+        const file = e.dataTransfer?.files?.[0];
+        if (!file){
+          setStatus("Keine Datei erkannt.", "warn");
+          return;
+        }
+        if (!/\.json$/i.test(file.name) && !String(file.type || "").includes("json")){
+          setStatus("Bitte eine .json Datei ablegen.", "warn");
+          return;
+        }
+        readFileAsText(file, (err, text) => {
+          if (err) return setStatus(err.message, "error");
+          try{
+            const loaded = parseImportedJsonText(text);
+            applyImportedState(loaded, `Drag&Drop: ${file.name}`);
+          }catch(e){
+            setStatus("Ungültiges JSON: " + (e?.message || String(e)), "error");
+          }
+        });
+      });
+    }
+
+    // Signal: click detected (helps debugging "passiert nichts")
+    $("importJsonPasteBtn")?.addEventListener("click", () => {
+      setStatus("Import aus Text: Button-Klick erkannt. Prüfe JSON ...", "info");
+    }, true);
+
+</script>
+
+</body>
+</html>
+

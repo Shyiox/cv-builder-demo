@@ -1,0 +1,11 @@
+# Generated exports
+*.pdf
+
+# Local/private data (keep demo_data.json public)
+*_private*.json
+my_cv.json
+lebenslauf*.json
+
+# Private helper pages (optional)
+talking-points*.html
+Interview_TalkingPoints_*.html
