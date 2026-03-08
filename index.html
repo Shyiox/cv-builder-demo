@@ -495,6 +495,28 @@
       margin-top: 10px;
     }
 
+    .checkline{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #111827;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .checkline input[type="checkbox"]{
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--blue);
+    }
+
+    .gh-note{
+      margin-top: 6px;
+      color: #374151;
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+
     .entry-controls{
       display: flex;
       gap: 8px;
@@ -698,36 +720,42 @@
 
     <hr style="border:0;border-top:1px solid #e5e7eb;margin:14px 0;">
 
-    <h2>Zusatzinfos</h2>
+    <h2>Fachlich</h2>
+    <div class="hint">Nur befuellte Zeilen erscheinen in der Vorschau. So bleibt der Block sauber und kompakt.</div>
 
     <div class="field">
       <label>EDV-Kenntnisse</label>
-      <input type="text" id="skillsEdv" />
+      <input type="text" id="skillsEdv" placeholder="Microsoft 365 (gut)" />
     </div>
 
     <div class="field">
       <label>Sprachen</label>
-      <input type="text" id="skillsLang" />
+      <input type="text" id="skillsLang" placeholder="Deutsch (Muttersprache) · Englisch (gut)" />
     </div>
 
     <div class="field">
       <label>Führerschein</label>
-      <input type="text" id="skillsDriver" />
+      <input type="text" id="skillsDriver" placeholder="Klasse B" />
     </div>
 
     <div class="field">
-      <label>Tools / Tech</label>
-      <input type="text" id="skillsTools" / placeholder="Python · Git · GitHub Actions · pytest">
+      <label>Tools / Technologien</label>
+      <input type="text" id="skillsTools" placeholder="Python · Git · GitHub Actions · pytest">
+    </div>
+
+    <div class="field">
+      <label>KI-gestützte Arbeit</label>
+      <input type="text" id="skillsAI" placeholder="KI-gestützte Recherche · Prompting · Prototyping · Dokumentation">
     </div>
 
     <div class="field">
       <label>Methoden / Arbeitsweise</label>
-      <input type="text" id="skillsMethods" / placeholder="Automation · Tests · Dokumentation">
+      <input type="text" id="skillsMethods" placeholder="Automatisierung · Testing · Debugging · Dokumentation">
     </div>
 
     <div class="field">
-      <label>Datenschutz / Privacy</label>
-      <input type="text" id="skillsPrivacy" / placeholder="PII/Datenschutz · DSGVO (Grundlagen)">
+      <label>Datenschutz / Compliance</label>
+      <input type="text" id="skillsPrivacy" placeholder="PII/Datenschutz · DSGVO (Grundlagen)">
     </div>
 
     <h2>GitHub</h2>
@@ -735,12 +763,43 @@
 
     <div class="field">
       <label>GitHub Profil (Link oder @Name)</label>
-      <input type="text" id="githubUrl" / placeholder="https://github.com/your-profile">
+      <input type="text" id="githubUrl" placeholder="https://github.com/your-profile">
     </div>
 
     <div class="field">
       <label>Projekt-Highlights (2–4 Zeilen)</label>
       <textarea id="githubHighlights" style="min-height: 86px;"></textarea>
+    </div>
+
+    <div class="field">
+      <label class="checkline">
+        <input type="checkbox" id="portfolioEnabled" />
+        <span>RIVAID in der Vorschau anzeigen</span>
+      </label>
+      <div class="smallnote">Kannst du schon vorbereiten. Sichtbar wird es erst, wenn du den Schalter aktivierst.</div>
+    </div>
+
+    <div class="field">
+      <label class="checkline">
+        <input type="checkbox" id="portfolioReplacesGithub" />
+        <span>Website statt GitHub-Karte anzeigen</span>
+      </label>
+      <div class="smallnote">Ideal nach dem Launch, wenn RIVAID dein Hauptprojekt in der Vorschau werden soll.</div>
+    </div>
+
+    <div class="field">
+      <label>Portfolio / Website Name</label>
+      <input type="text" id="portfolioName" placeholder="RIVAID">
+    </div>
+
+    <div class="field">
+      <label>Portfolio / Website Link</label>
+      <input type="text" id="portfolioUrl" placeholder="rivaid.de oder https://rivaid.de">
+    </div>
+
+    <div class="field">
+      <label>Kurztext für Portfolio / Website</label>
+      <textarea id="portfolioSummary" style="min-height: 74px;" placeholder="Eigene Website / Plattform. Wird nach dem Launch als zusätzliches Projekt oder Portfolio-Link eingeblendet."></textarea>
     </div>
 
     <div class="btnbar">
@@ -864,7 +923,7 @@
             </div>
 
             <div class="info-card">
-              <h3>GitHub</h3>
+              <h3 id="secondaryCardTitle">GitHub</h3>
               <div class="kv" id="githubPreview"></div>
             </div>
           </div>
@@ -979,6 +1038,9 @@
     // Backward compatibility: ältere Saves (Ehrenamt) -> GitHub-Felder
     if (!merged.githubUrl && loaded?.volOrg) merged.githubUrl = loaded.volOrg;
     if (!merged.githubHighlights && loaded?.volAreas) merged.githubHighlights = loaded.volAreas;
+    if (!merged.portfolioName) merged.portfolioName = "RIVAID";
+    merged.portfolioEnabled = Boolean(merged.portfolioEnabled);
+    merged.portfolioReplacesGithub = Boolean(merged.portfolioReplacesGithub);
 
     if (Array.isArray(loaded?.entries)) merged.entries = loaded.entries;
     if (Array.isArray(loaded?.education)) merged.education = loaded.education;
@@ -1058,12 +1120,18 @@
     skillsLang: "",
     skillsDriver: "",
     skillsTools: "",
+    skillsAI: "",
     skillsMethods: "",
     skillsPrivacy: "",
 
     // GitHub
     githubUrl: "",
-    githubHighlights: ""
+    githubHighlights: "",
+    portfolioEnabled: false,
+    portfolioReplacesGithub: false,
+    portfolioName: "RIVAID",
+    portfolioUrl: "",
+    portfolioSummary: ""
   };
 
   function clone(obj){
@@ -1203,11 +1271,13 @@
         { label: "Sprachen", value: state.skillsLang },
         { label: "Führerschein", value: state.skillsDriver },
         { label: "Tools", value: state.skillsTools },
-        { label: "Methoden", value: state.skillsMethods },
-        { label: "Privacy", value: state.skillsPrivacy }
-      ];
+        { label: "KI", value: state.skillsAI },
+        { label: "Arbeitsweise", value: state.skillsMethods },
+        { label: "Datenschutz", value: state.skillsPrivacy }
+      ].filter((row) => (row.value || "").trim());
+
       skills.innerHTML = `
-        ${skillRows.map((row) => `
+        ${(skillRows.length ? skillRows : [{ label: "Hinweis", value: "-" }]).map((row) => `
           <div class="kv-row">
             <span class="kv-label">${escapeHtml(row.label)}</span>
             <span class="kv-value">${escapeHtml((row.value || "").trim() || "-")}</span>
@@ -1218,15 +1288,27 @@
 
     // GitHub
     const gh = $("githubPreview");
+    const secondaryCardTitle = $("secondaryCardTitle");
     if (gh){
       const url = (state.githubUrl || "").trim();
       const hl = (state.githubHighlights || "").trim();
+      const portfolioName = (state.portfolioName || "RIVAID").trim();
+      const portfolioUrlRaw = (state.portfolioUrl || "").trim();
+      const portfolioSummary = (state.portfolioSummary || "").trim();
+      const showPortfolioOnly = Boolean(state.portfolioEnabled && state.portfolioReplacesGithub);
       const normalizedUrl = url.replace(/^@/, "github.com/");
       let href = "";
       if (/^https?:\/\//i.test(normalizedUrl)) href = normalizedUrl;
       else if (/^github\.com\//i.test(normalizedUrl)) href = "https://" + normalizedUrl;
       if (/^http:\/\//i.test(href)) href = "https://" + href.slice(7);
       if (!/^https:\/\/github\.com\//i.test(href)) href = "";
+
+      let portfolioHref = portfolioUrlRaw;
+      if (portfolioHref && !/^[a-z]+:\/\//i.test(portfolioHref)) portfolioHref = "https://" + portfolioHref;
+
+      if (secondaryCardTitle) {
+        secondaryCardTitle.textContent = showPortfolioOnly ? (portfolioName || "Website") : "GitHub";
+      }
 
       const profileHtml = href
         ? `<a class="gh-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`
@@ -1247,11 +1329,37 @@
         return `<div class="gh-item-title">${title}:</div><div class="gh-item-desc">${desc}</div>`;
       }
 
-      const highlightsHtml = highlightItems.length
-        ? `<ul class="gh-list">${highlightItems.map((line) => `<li>${formatGitHubHighlight(line)}</li>`).join("")}</ul>`
-        : `<span class="gh-url-fallback">-</span>`;
+        const highlightsHtml = highlightItems.length
+          ? `<ul class="gh-list">${highlightItems.map((line) => `<li>${formatGitHubHighlight(line)}</li>`).join("")}</ul>`
+          : `<span class="gh-url-fallback">-</span>`;
 
-      gh.innerHTML = `
+      const portfolioHtml = state.portfolioEnabled
+        ? `
+        <div class="gh-row">
+          <div class="gh-label">Website</div>
+          ${portfolioHref
+            ? `<a class="gh-link" href="${escapeHtml(portfolioHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(portfolioName)}</a>`
+            : `<span class="gh-url-fallback">${escapeHtml(portfolioName || "Portfolio")}</span>`
+          }
+          ${portfolioSummary ? `<div class="gh-note">${escapeHtml(portfolioSummary)}</div>` : ""}
+        </div>`
+        : "";
+
+      const portfolioOnlyHtml = `
+        <div class="gh-row">
+          <div class="gh-label">Website</div>
+          ${portfolioHref
+            ? `<a class="gh-link" href="${escapeHtml(portfolioHref)}" target="_blank" rel="noopener noreferrer">${escapeHtml(portfolioName || "Website")}</a>`
+            : `<span class="gh-url-fallback">${escapeHtml(portfolioName || "Website")}</span>`
+          }
+          ${portfolioSummary ? `<div class="gh-note">${escapeHtml(portfolioSummary)}</div>` : ""}
+        </div>
+      `;
+
+      if (showPortfolioOnly) {
+        gh.innerHTML = portfolioOnlyHtml;
+      } else {
+        gh.innerHTML = `
         <div class="gh-row">
           <div class="gh-label">Profil</div>
           ${profileHtml}
@@ -1260,7 +1368,9 @@
           <div class="gh-label">Projekte</div>
           ${highlightsHtml}
         </div>
+        ${portfolioHtml}
       `;
+      }
     }
 
     // Editor values
@@ -1281,11 +1391,20 @@
     if ($("skillsLang")) $("skillsLang").value = state.skillsLang ?? "";
     if ($("skillsDriver")) $("skillsDriver").value = state.skillsDriver ?? "";
     if ($("skillsTools")) $("skillsTools").value = state.skillsTools ?? "";
+    if ($("skillsAI")) $("skillsAI").value = state.skillsAI ?? "";
     if ($("skillsMethods")) $("skillsMethods").value = state.skillsMethods ?? "";
     if ($("skillsPrivacy")) $("skillsPrivacy").value = state.skillsPrivacy ?? "";
 
     if ($("githubUrl")) $("githubUrl").value = state.githubUrl ?? "";
     if ($("githubHighlights")) $("githubHighlights").value = state.githubHighlights ?? "";
+    if ($("portfolioEnabled")) $("portfolioEnabled").checked = Boolean(state.portfolioEnabled);
+    if ($("portfolioReplacesGithub")) {
+      $("portfolioReplacesGithub").checked = Boolean(state.portfolioReplacesGithub);
+      $("portfolioReplacesGithub").disabled = !state.portfolioEnabled;
+    }
+    if ($("portfolioName")) $("portfolioName").value = state.portfolioName ?? "";
+    if ($("portfolioUrl")) $("portfolioUrl").value = state.portfolioUrl ?? "";
+    if ($("portfolioSummary")) $("portfolioSummary").value = state.portfolioSummary ?? "";
 
     renderEntriesEditor();
     renderEducationEditor();
@@ -1443,11 +1562,17 @@
     $("skillsDriver")?.addEventListener("input", (e) => { state.skillsDriver = e.target.value; render(); });
 
     $("skillsTools")?.addEventListener("input", (e) => { state.skillsTools = e.target.value; render(); });
+    $("skillsAI")?.addEventListener("input", (e) => { state.skillsAI = e.target.value; render(); });
     $("skillsMethods")?.addEventListener("input", (e) => { state.skillsMethods = e.target.value; render(); });
     $("skillsPrivacy")?.addEventListener("input", (e) => { state.skillsPrivacy = e.target.value; render(); });
 
     $("githubUrl")?.addEventListener("input", (e) => { state.githubUrl = e.target.value; render(); });
     $("githubHighlights")?.addEventListener("input", (e) => { state.githubHighlights = e.target.value; render(); });
+    $("portfolioEnabled")?.addEventListener("change", (e) => { state.portfolioEnabled = e.target.checked; render(); });
+    $("portfolioReplacesGithub")?.addEventListener("change", (e) => { state.portfolioReplacesGithub = e.target.checked; render(); });
+    $("portfolioName")?.addEventListener("input", (e) => { state.portfolioName = e.target.value; render(); });
+    $("portfolioUrl")?.addEventListener("input", (e) => { state.portfolioUrl = e.target.value; render(); });
+    $("portfolioSummary")?.addEventListener("input", (e) => { state.portfolioSummary = e.target.value; render(); });
 
     $("photoUpload")?.addEventListener("change", (e) => {
       const file = e.target.files?.[0];
@@ -1836,4 +1961,3 @@ $("resetAll")?.addEventListener("click", () => {
 
 </body>
 </html>
-
